@@ -124,7 +124,7 @@ func (srv *UDPListenerServer) ProcessMessage(nodePort int, nodeName string, pack
 		}
 
 	} else {
-		//fmt.Println(err)
+		//fmt.Println("packet not stored")
 	}
 }
 
@@ -172,6 +172,7 @@ BroadCastLoop:
 			fmt.Println("Broadcaster Stop")
 			break BroadCastLoop
 		case cmd = <-srv.commandChannel:
+			fmt.Println("New Command Request")
 			goto Broadcast
 		}
 	Broadcast:
@@ -199,6 +200,7 @@ BroadCastLoop:
 			//fmt.Printf("Data: %v \n", cmd.Data)
 			//fmt.Printf("command bytes: %v \n", packetBytes)
 			_, connErr = conn.Write(packetBytes)
+			fmt.Printf("Sending command: %d \n", cmd.CommandId)
 		}
 
 		if connErr != nil {
@@ -218,6 +220,7 @@ BroadCastLoop:
 			srv.dataStoreChannel <- statusDataStore
 		}
 		conn.Close()
+
 	}
 	srv.isRunning = false
 }
@@ -282,7 +285,7 @@ func CreateNewUDPListenerServers(channel chan<- gstypes.PacketStoreElement, logg
 	return serversArray
 }
 
-func CreateNewUDPCommandServer(hosts []gstypes.Host) (*UDPBroadcasterServer, chan<- gstypes.Command) {
+func CreateNewUDPCommandServer(hosts []gstypes.Host,dataStoreChannel chan<- gstypes.PacketStoreElement) (*UDPBroadcasterServer, chan<- gstypes.Command,) {
 	signalChannel := make(chan bool)
 	commandChannel := make(chan gstypes.Command, 4)
 	srv := &UDPBroadcasterServer{
@@ -290,6 +293,7 @@ func CreateNewUDPCommandServer(hosts []gstypes.Host) (*UDPBroadcasterServer, cha
 		hosts:          hosts,
 		commandChannel: commandChannel,
 		isRunning:      false,
-		doRun:          false}
+		doRun:          false,
+		dataStoreChannel: dataStoreChannel}
 	return srv, commandChannel
 }

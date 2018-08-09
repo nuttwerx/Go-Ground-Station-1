@@ -108,7 +108,7 @@ func main() {
 	//Create the datastoremanager server
 	dataStoreManager, dataStoreChannel = datastore.New(grpcChannelsHolder)
 	//create the broadcasting server that will send the commands to the rpod
-	udpBroadCasterServer, commandChannel = server.CreateNewUDPCommandServer(hostsToCommand)
+	udpBroadCasterServer, commandChannel = server.CreateNewUDPCommandServer(hostsToCommand, dataStoreChannel)
 	//Create the UDPListenerServers that will listen to the packets sent by the rpod
 	udpListenerServers = server.CreateNewUDPListenerServers(dataStoreChannel, loggerChannel, nodesPorts, nodesMap)
 	//Create the gsgrpc stream server

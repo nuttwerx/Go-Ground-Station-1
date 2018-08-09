@@ -149,6 +149,7 @@ func (srv *GRPCServer) SendCommand(ctx context.Context, cmd *proto.Command) (*pr
 		if err != nil {
 			ack.Success = false
 			ack.Message = err.Error()
+			fmt.Printf("Command Binary error: %s \n", ack.Message)
 			goto returnStatement
 		} else {
 			dataBytesArray[idx] = buf.Bytes()
