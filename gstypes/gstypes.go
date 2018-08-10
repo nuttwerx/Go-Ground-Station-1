@@ -7,6 +7,10 @@ import (
 	"sync"
 )
 
+const (
+	SUBSCRIBE_ALL = 0
+)
+
 type Param struct {
 	Name      string
 	Type      types.BasicKind
@@ -77,12 +81,12 @@ type DataStoreBundle struct {
 }
 
 type Command struct {
-	Origin string
+	Origin      string
 	Node        string
 	PacketType  int32
 	Data        []byte
 	CommandName string
-	CommandId	int32
+	CommandId   int32
 }
 
 type ReceiversCoordination struct {

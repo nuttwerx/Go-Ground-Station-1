@@ -1,8 +1,8 @@
 package datastore
 
 import (
-	"rloop/Go-Ground-Station-1/constants"
 	"fmt"
+	"rloop/Go-Ground-Station-1/constants"
 	"rloop/Go-Ground-Station-1/gsgrpc"
 	"rloop/Go-Ground-Station-1/gstypes"
 	"runtime"
@@ -20,6 +20,7 @@ type DataStoreManager struct {
 	checkerSignalChannel   chan bool
 	packetChannel          <-chan gstypes.PacketStoreElement
 	receiversChannelHolder *gsgrpc.ChannelsHolder
+	subscribersHolder      *gsgrpc.SubscribersHolder
 	ticker                 *time.Ticker
 	packetStoreCount       int64
 
@@ -131,7 +132,7 @@ func (manager *DataStoreManager) ProcessNewPacket(packet gstypes.PacketStoreElem
 	}
 	manager.rtDataStoreMutex.Lock()
 	manager.saveToDataStore(dataBundle)
-	manager.sendDatastoreUpdate()
+	manager.sendDatastoreUpdate(dataBundle)
 	manager.rtDataStoreMutex.Unlock()
 	manager.packetStoreCount++
 }
@@ -191,7 +192,7 @@ func (manager *DataStoreManager) checkDatastore(currTime time.Time) {
 		dataBundle := gstypes.DataStoreBundle{}
 		dataBundle.Data = data[0:count]
 		manager.saveToDataStore(dataBundle)
-		manager.sendDatastoreUpdate()
+		manager.sendDatastoreUpdate(dataBundle)
 	}
 	manager.rtDataStoreMutex.Unlock()
 }
@@ -203,29 +204,82 @@ func (manager *DataStoreManager) saveToDataStore(dataBundle gstypes.DataStoreBun
 	}
 }
 
-func (manager *DataStoreManager) sendDatastoreUpdate() {
-	dataBundle := gstypes.DataStoreBundle{}
-	dataBundle.Data = make([]gstypes.DataStoreElement, len(manager.rtData))
+func (manager *DataStoreManager) sendDatastoreUpdate(dataBundle gstypes.DataStoreBundle) {
+	//Send only updated data to subscribers for all params
+	manager.sendDataBundleSubAll(dataBundle)
+	manager.sendDataBundleSubParams(dataBundle)
+	//Send a global update of certain parameters for subscribers that ask only for a number of params
+	//If one of the parameters is updated
 
-	idx := 0
-	for _, value := range manager.rtData {
-		dataBundle.Data[idx] = value
-		idx++
-	}
-	manager.sendDataBundle(dataBundle)
+	/*
+		dataBundle := gstypes.DataStoreBundle{}
+		dataBundle.Data = make([]gstypes.DataStoreElement, len(manager.rtData))
+
+		idx := 0
+		for _, value := range manager.rtData {
+			dataBundle.Data[idx] = value
+			idx++
+		}
+	*/
+
 }
 
-func (manager *DataStoreManager) sendDataBundle(dataBundle gstypes.DataStoreBundle) {
-	manager.receiversChannelHolder.ReceiverMutex.Lock()
+func (manager *DataStoreManager) sendDataBundleSubAll(dataBundle gstypes.DataStoreBundle) {
+	manager.subscribersHolder.SubscriberMutex.Lock()
 	//send the bundle to all subscribers
-	for channel := range manager.receiversChannelHolder.Receivers {
+	for sub := range manager.subscribersHolder.SubscribersAll {
 		select {
-		case *channel <- dataBundle:
+		case *sub.Channel <- dataBundle:
 		default:
 			fmt.Printf("streamerchannel is full \n")
 		}
 	}
-	manager.receiversChannelHolder.ReceiverMutex.Unlock()
+	manager.subscribersHolder.SubscriberMutex.Unlock()
+}
+
+func (manager *DataStoreManager) sendDataBundleSubParams(dataBundle gstypes.DataStoreBundle) {
+	manager.subscribersHolder.SubscriberMutex.Lock()
+	var pushCurrentDataStoreElement bool
+	var requestedParameters map[string]struct{}
+	var requestedParametersCount int
+
+	//take the subscribers with params
+	//TODO change the list
+	SubsParam := manager.subscribersHolder.SubscribersCustom
+
+	var wantsParam bool
+	for sub := range SubsParam {
+		//check if one of the updated params is wanted by the sub
+		requestedParameters = sub.Parameters
+	SearchLoop:
+		for _, data := range dataBundle.Data {
+			_, wantsParam = requestedParameters[data.FullParameterName]
+			if wantsParam {
+				break SearchLoop
+			}
+		}
+		//If one of the desired parameters were updated, collect the parameters and send them
+		if wantsParam {
+			var idxArr = 0
+			requestedParametersCount = len(requestedParameters)
+			dataBundle := gstypes.DataStoreBundle{}
+			dataBundle.Data = make([]gstypes.DataStoreElement, requestedParametersCount)
+		CollectLoop:
+			for _, dataStoreElement := range manager.rtData {
+				_, pushCurrentDataStoreElement = requestedParameters[dataStoreElement.FullParameterName]
+				if pushCurrentDataStoreElement {
+					dataBundle.Data[idxArr] = dataStoreElement
+					idxArr++
+				}
+				if idxArr >= requestedParametersCount {
+					break CollectLoop
+				}
+			}
+			*sub.Channel <- dataBundle
+		}
+	}
+
+	manager.subscribersHolder.SubscriberMutex.Unlock()
 }
 
 func (manager *DataStoreManager) GetStatus() (bool, bool) {
@@ -253,20 +307,20 @@ func cleanJoin(prefix string, name string) string {
 	return fullyFormattedName
 }
 
-func New(channelsHolder *gsgrpc.ChannelsHolder) (*DataStoreManager, chan<- gstypes.PacketStoreElement) {
+func New(subscribersHolder *gsgrpc.SubscribersHolder) (*DataStoreManager, chan<- gstypes.PacketStoreElement) {
 	//the channel that will be used to transfer data between the parser and the datastoremanager
 	packetStoreChannel := make(chan gstypes.PacketStoreElement, 64)
 	signalChannel := make(chan bool)
 	checkerSignalChannel := make(chan bool)
 	dataStoreManager := &DataStoreManager{
-		signalChannel:          signalChannel,
-		checkerSignalChannel:   checkerSignalChannel,
-		packetStoreCount:       0,
-		receiversChannelHolder: channelsHolder,
-		packetChannel:          packetStoreChannel,
-		rtData:                 map[string]gstypes.DataStoreElement{},
-		rtDataStoreMutex:       &sync.Mutex{},
-		ticker:                 time.NewTicker(time.Second * 3)}
+		signalChannel:        signalChannel,
+		checkerSignalChannel: checkerSignalChannel,
+		packetStoreCount:     0,
+		subscribersHolder:    subscribersHolder,
+		packetChannel:        packetStoreChannel,
+		rtData:               map[string]gstypes.DataStoreElement{},
+		rtDataStoreMutex:     &sync.Mutex{},
+		ticker:               time.NewTicker(time.Second * 3)}
 	dataStoreManager.initDataStore()
 	return dataStoreManager, packetStoreChannel
 }

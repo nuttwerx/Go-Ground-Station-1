@@ -24,21 +24,21 @@ type UDPBroadcasterServer struct {
 	doRun              bool
 	signalChannel      chan bool
 	commandChannel     <-chan gstypes.Command
-	dataStoreChannel chan<- gstypes.PacketStoreElement
+	dataStoreChannel   chan<- gstypes.PacketStoreElement
 	podCommandSequence int32
 }
 
 type UDPListenerServer struct {
-	isRunningMutex     sync.RWMutex
-	IsRunning          bool
-	doRunMutex         sync.RWMutex
-	doRun              bool
-	signalChannel      chan bool
-	conn               *net.UDPConn
-	ServerPort         int
-	NodeName           string
+	isRunningMutex   sync.RWMutex
+	IsRunning        bool
+	doRunMutex       sync.RWMutex
+	doRun            bool
+	signalChannel    chan bool
+	conn             *net.UDPConn
+	ServerPort       int
+	NodeName         string
 	dataStoreChannel chan<- gstypes.PacketStoreElement
-	loggerChan         chan<- gstypes.PacketStoreElement
+	loggerChan       chan<- gstypes.PacketStoreElement
 }
 
 func (srv *UDPListenerServer) open(port int) error {
@@ -209,14 +209,14 @@ BroadCastLoop:
 			srv.podCommandSequence++
 			paramName := "Last Command " + cmd.Origin
 			unit := gstypes.DataStoreUnit{
-				ValueIndex:3,
-				Int32Value:cmd.CommandId}
+				ValueIndex: 3,
+				Int32Value: cmd.CommandId}
 			element := gstypes.DataStoreElement{
 				ParameterName: paramName,
-				Data:unit}
+				Data:          unit}
 			dataStoreElementArr := []gstypes.DataStoreElement{element}
 			statusDataStore = gstypes.PacketStoreElement{
-				Parameters:dataStoreElementArr}
+				Parameters: dataStoreElementArr}
 			srv.dataStoreChannel <- statusDataStore
 			conn.Close()
 		}
@@ -269,11 +269,11 @@ func CreateNewUDPListenerServers(channel chan<- gstypes.PacketStoreElement, logg
 	//create and open all the servers
 	for idx := 0; idx < amountNodes; idx++ {
 		srv := &UDPListenerServer{
-			IsRunning:          false,
-			doRun:              false,
+			IsRunning:        false,
+			doRun:            false,
 			dataStoreChannel: channel,
-			loggerChan:         loggerChannel,
-			NodeName:           nodesMap[nodesPorts[idx]].Name}
+			loggerChan:       loggerChannel,
+			NodeName:         nodesMap[nodesPorts[idx]].Name}
 		err := srv.open(nodesPorts[idx])
 		if err == nil {
 			serversArray[idx] = srv
@@ -284,15 +284,15 @@ func CreateNewUDPListenerServers(channel chan<- gstypes.PacketStoreElement, logg
 	return serversArray
 }
 
-func CreateNewUDPCommandServer(hosts []gstypes.Host,dataStoreChannel chan<- gstypes.PacketStoreElement) (*UDPBroadcasterServer, chan<- gstypes.Command,) {
+func CreateNewUDPCommandServer(hosts []gstypes.Host, dataStoreChannel chan<- gstypes.PacketStoreElement) (*UDPBroadcasterServer, chan<- gstypes.Command) {
 	signalChannel := make(chan bool)
 	commandChannel := make(chan gstypes.Command, 4)
 	srv := &UDPBroadcasterServer{
-		signalChannel:  signalChannel,
-		hosts:          hosts,
-		commandChannel: commandChannel,
-		isRunning:      false,
-		doRun:          false,
+		signalChannel:    signalChannel,
+		hosts:            hosts,
+		commandChannel:   commandChannel,
+		isRunning:        false,
+		doRun:            false,
 		dataStoreChannel: dataStoreChannel}
 	return srv, commandChannel
 }
