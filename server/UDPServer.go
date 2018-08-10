@@ -203,7 +203,7 @@ BroadCastLoop:
 			fmt.Printf("Sending command: %d \n", cmd.CommandId)
 		}
 
-		if connErr != nil {
+		if connErr != nil || conn == nil {
 			fmt.Printf("Command write error: %v", connErr)
 		} else {
 			srv.podCommandSequence++
@@ -218,9 +218,8 @@ BroadCastLoop:
 			statusDataStore = gstypes.PacketStoreElement{
 				Parameters:dataStoreElementArr}
 			srv.dataStoreChannel <- statusDataStore
+			conn.Close()
 		}
-		conn.Close()
-
 	}
 	srv.isRunning = false
 }
