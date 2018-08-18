@@ -46,7 +46,7 @@ func (srv *UDPListenerServer) open(port int) error {
 	srv.ServerPort = port
 	//create the address string arr
 	//addressArray := []string{"127.0.0.2:", strconv.Itoa(port)}
-	addressArray := []string{"127.0.0.1:", strconv.Itoa(port)}
+	addressArray := []string{"127.0.0.2:", strconv.Itoa(port)}
 
 	//join the address string
 	udpAddrString := strings.Join(addressArray, "")
