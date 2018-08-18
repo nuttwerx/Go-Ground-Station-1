@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type GSUDPServer interface {
@@ -213,7 +214,8 @@ BroadCastLoop:
 				Int32Value: cmd.CommandId}
 			element := gstypes.DataStoreElement{
 				ParameterName: paramName,
-				Data:          unit}
+				Data:          unit,
+				RxTime: time.Now().Unix()}
 			dataStoreElementArr := []gstypes.DataStoreElement{element}
 			statusDataStore = gstypes.PacketStoreElement{
 				Parameters: dataStoreElementArr}

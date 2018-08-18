@@ -48,6 +48,7 @@ MainLoop:
 		}
 	}
 	client.conn.Close()
+	fmt.Println("Simcontroller Shutting Down")
 	client.IsRunning = false
 }
 
@@ -64,7 +65,7 @@ func (client *SimController) SendCommand(cmd *gstypes.SimulatorCommandWithRespon
 
 	rack := &proto.Ack{}
 	if client.conn == nil {
-		log.Fatalf("Cannot send sim command: Connection is not set \n")
+		fmt.Println("Cannot send sim command: Connection is not set \n")
 		rack.Success = false
 		rack.Message = "Cannot send sim command: Connection is not set"
 		goto ResponseStatement
@@ -78,7 +79,7 @@ func (client *SimController) SendCommand(cmd *gstypes.SimulatorCommandWithRespon
 	ctx, cancel = context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	fmt.Printf("sending command: %v \n", simCommand)
+	fmt.Printf("Simcontroller Sending command: %v \n", simCommand)
 	ack, err = client.client.ControlSim(ctx, simCommand)
 
 	if err != nil {
@@ -92,6 +93,7 @@ func (client *SimController) SendCommand(cmd *gstypes.SimulatorCommandWithRespon
 	}
 	fmt.Printf("Sim Controller Response: %s\n", rack.Message)
 ResponseStatement:
+	fmt.Printf("Simcontroller Command Message: %s \n",rack.Message)
 	cmd.ResponseChan <- rack
 }
 
