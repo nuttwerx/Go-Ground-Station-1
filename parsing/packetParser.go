@@ -49,7 +49,7 @@ func ParsePacket(nodePort int, nodeName string, packet []byte, errcount *int) (g
 			}*/
 		return ParsePayload(definition, payloadLengthInt, nodePort, nodeName, payload)
 	} else {
-		errmsg := fmt.Sprintf("packet type '%d' is not defined", packetType)
+		errmsg := fmt.Sprintf("packet type '%d' is not defined \n", packetType)
 		return gstypes.PacketStoreElement{}, errors.New(errmsg)
 	}
 
