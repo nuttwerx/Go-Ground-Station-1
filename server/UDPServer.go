@@ -214,7 +214,7 @@ BroadCastLoop:
 			element := gstypes.DataStoreElement{
 				ParameterName: paramName,
 				Data:          unit,
-				RxTime: time.Now().Unix()}
+				RxTime:        time.Now().Unix()}
 			dataStoreElementArr := []gstypes.DataStoreElement{element}
 			statusDataStore = gstypes.PacketStoreElement{
 				Parameters: dataStoreElementArr}
@@ -261,7 +261,7 @@ func (srv *UDPBroadcasterServer) GetStatus() (bool, bool) {
 	return srv.isRunning, srv.doRun
 }
 
-func CreateNewUDPListenerServers(address string,nodesPorts []int, channel chan<- gstypes.PacketStoreElement, loggerChannel chan<- gstypes.PacketStoreElement, nodesMap map[int]gstypes.Host) []*UDPListenerServer {
+func CreateNewUDPListenerServers(address string, nodesPorts []int, channel chan<- gstypes.PacketStoreElement, loggerChannel chan<- gstypes.PacketStoreElement, nodesMap map[int]gstypes.Host) []*UDPListenerServer {
 	amountNodes := len(nodesPorts)
 	//create an array that will keep the servers
 	serversArray := make([]*UDPListenerServer, amountNodes)
@@ -275,7 +275,7 @@ func CreateNewUDPListenerServers(address string,nodesPorts []int, channel chan<-
 			dataStoreChannel: channel,
 			loggerChan:       loggerChannel,
 			NodeName:         nodesMap[nodesPorts[idx]].Name}
-		err := srv.open(address,nodesPorts[idx])
+		err := srv.open(address, nodesPorts[idx])
 		if err == nil {
 			serversArray[idx] = srv
 		} else {
