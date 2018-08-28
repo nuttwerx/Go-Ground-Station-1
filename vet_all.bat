@@ -1,31 +1,31 @@
 @ECHO OFF
 ECHO This script will vet all packages in this project
 ECHO Vetting main package
-go vet rloop/Go-Ground-Station-1/ 2> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/ 2> vet_results.txt
 CALL :CheckError
 ECHO Vetting constants package
-go vet rloop/Go-Ground-Station-1/constants 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/constants 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting datastore package
-go vet rloop/Go-Ground-Station-1/datastore 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/datastore 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting gsgrpc package
-go vet rloop/Go-Ground-Station-1/gsgrpc 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/gsgrpc 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting gstypes package
-go vet rloop/Go-Ground-Station-1/gstypes 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/gstypes 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting helpers package
-go vet rloop/Go-Ground-Station-1/helpers 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/helpers 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting logging package
-go vet rloop/Go-Ground-Station-1/logging 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/logging 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting parsing package
-go vet rloop/Go-Ground-Station-1/parsing 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/parsing 2>> vet_results.txt
 CALL :CheckError
 ECHO Vetting server package
-go vet rloop/Go-Ground-Station-1/server 2>> vet_results.txt
+go vet rloop/Groundstation-v2-Backend-Fork/server 2>> vet_results.txt
 CALL :CheckError
 
 EXIT /B %ERRORLEVEL%

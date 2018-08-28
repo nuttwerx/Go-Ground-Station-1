@@ -2,9 +2,9 @@ package datastore
 
 import (
 	"fmt"
-	"rloop/Go-Ground-Station-1/constants"
-	"rloop/Go-Ground-Station-1/gsgrpc"
-	"rloop/Go-Ground-Station-1/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/constants"
+	"rloop/Groundstation-v2-Backend-Fork/gsgrpc"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
 	"runtime"
 	"strings"
 	"sync"

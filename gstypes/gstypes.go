@@ -3,7 +3,7 @@ package gstypes
 import (
 	"context"
 	"go/types"
-	"rloop/Go-Ground-Station-1/proto"
+	"rloop/Groundstation-v2-Backend-Fork/proto"
 	"sync"
 )
 

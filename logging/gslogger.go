@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"rloop/Go-Ground-Station-1/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
 	"strconv"
 	"sync"
 	"time"

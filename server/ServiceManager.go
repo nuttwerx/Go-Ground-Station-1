@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"net"
-	"rloop/Go-Ground-Station-1/datastore"
-	"rloop/Go-Ground-Station-1/gstypes"
-	"rloop/Go-Ground-Station-1/logging"
+	"rloop/Groundstation-v2-Backend-Fork/datastore"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/logging"
 	"sync"
 	"time"
 )

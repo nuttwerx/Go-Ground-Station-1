@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"rloop/Go-Ground-Station-1/gstypes"
-	"rloop/Go-Ground-Station-1/helpers"
-	"rloop/Go-Ground-Station-1/parsing"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/helpers"
+	"rloop/Groundstation-v2-Backend-Fork/parsing"
 	"strconv"
 	"strings"
 	"sync"
@@ -42,12 +42,11 @@ type UDPListenerServer struct {
 	loggerChan       chan<- gstypes.PacketStoreElement
 }
 
-func (srv *UDPListenerServer) open(port int) error {
+func (srv *UDPListenerServer) open(address string, port int) error {
 	srv.ServerPort = port
+	address += ":"
 	//create the address string arr
-	addressArray := []string{"127.0.0.2:", strconv.Itoa(port)}
-	//addressArray := []string{":", strconv.Itoa(port)}
-
+	addressArray := []string{address, strconv.Itoa(port)}
 	//join the address string
 	udpAddrString := strings.Join(addressArray, "")
 	udpAddr, err := net.ResolveUDPAddr("udp4", udpAddrString)
@@ -262,7 +261,7 @@ func (srv *UDPBroadcasterServer) GetStatus() (bool, bool) {
 	return srv.isRunning, srv.doRun
 }
 
-func CreateNewUDPListenerServers(channel chan<- gstypes.PacketStoreElement, loggerChannel chan<- gstypes.PacketStoreElement, nodesPorts []int, nodesMap map[int]gstypes.Host) []*UDPListenerServer {
+func CreateNewUDPListenerServers(address string,nodesPorts []int, channel chan<- gstypes.PacketStoreElement, loggerChannel chan<- gstypes.PacketStoreElement, nodesMap map[int]gstypes.Host) []*UDPListenerServer {
 	amountNodes := len(nodesPorts)
 	//create an array that will keep the servers
 	serversArray := make([]*UDPListenerServer, amountNodes)
@@ -276,7 +275,7 @@ func CreateNewUDPListenerServers(channel chan<- gstypes.PacketStoreElement, logg
 			dataStoreChannel: channel,
 			loggerChan:       loggerChannel,
 			NodeName:         nodesMap[nodesPorts[idx]].Name}
-		err := srv.open(nodesPorts[idx])
+		err := srv.open(address,nodesPorts[idx])
 		if err == nil {
 			serversArray[idx] = srv
 		} else {
