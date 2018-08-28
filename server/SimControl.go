@@ -65,7 +65,7 @@ func (client *SimController) SendCommand(cmd *gstypes.SimulatorCommandWithRespon
 
 	rack := &proto.Ack{}
 	if client.conn == nil {
-		fmt.Println("Cannot send sim command: Connection is not set \n")
+		fmt.Println("Cannot send sim command: Connection is not set")
 		rack.Success = false
 		rack.Message = "Cannot send sim command: Connection is not set"
 		goto ResponseStatement
