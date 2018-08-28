@@ -66,7 +66,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	listenAddr = "127.0.0.2"
+	listenAddr = networkConfig.ListenAddress
 	hostsTolisten = networkConfig.HostsToListen
 	hostsToCommand = networkConfig.HostsToCommand
 	GrpcPort = networkConfig.Grpc

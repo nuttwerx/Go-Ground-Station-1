@@ -122,6 +122,7 @@ type Config struct {
 type Networking struct {
 	HostsToListen  []Host `json:HostsToListen`
 	HostsToCommand []Host `json:HostsToCommand`
+	ListenAddress  string `json:ListenAddress`
 	Grpc           int    `json:Grpc`
 	PySim          string `json:PySim`
 	WithSim        bool   `json:WithSim`

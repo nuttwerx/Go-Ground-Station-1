@@ -93,7 +93,7 @@ func (client *SimController) SendCommand(cmd *gstypes.SimulatorCommandWithRespon
 	}
 	fmt.Printf("Sim Controller Response: %s\n", rack.Message)
 ResponseStatement:
-	fmt.Printf("Simcontroller Command Message: %s \n",rack.Message)
+	fmt.Printf("Simcontroller Command Message: %s \n", rack.Message)
 	cmd.ResponseChan <- rack
 }
 
