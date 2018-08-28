@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	"rloop/Go-Ground-Station-1/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
 )
 
 func Push(array *[]gstypes.DataStoreElement, idx int, element gstypes.DataStoreElement) {

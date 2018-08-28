@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"log"
-	"rloop/Go-Ground-Station-1/proto"
+	"rloop/Groundstation-v2-Backend-Fork/proto"
 )
 
 func main() {

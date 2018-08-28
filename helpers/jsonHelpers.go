@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"rloop/Go-Ground-Station-1/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
 )
 
 func DecodeNetworkingFile(path string) (gstypes.Networking, error) {

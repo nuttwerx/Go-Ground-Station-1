@@ -2,7 +2,7 @@ package constants
 
 import (
 	"go/types"
-	"rloop/Go-Ground-Station-1/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
 )
 
 var (

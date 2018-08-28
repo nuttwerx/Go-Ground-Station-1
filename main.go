@@ -9,12 +9,12 @@ import (
 	//"net/http"
 	_ "net/http/pprof"
 	"os"
-	"rloop/Go-Ground-Station-1/datastore"
-	"rloop/Go-Ground-Station-1/gsgrpc"
-	"rloop/Go-Ground-Station-1/gstypes"
-	"rloop/Go-Ground-Station-1/helpers"
-	"rloop/Go-Ground-Station-1/logging"
-	"rloop/Go-Ground-Station-1/server"
+	"rloop/Groundstation-v2-Backend-Fork/datastore"
+	"rloop/Groundstation-v2-Backend-Fork/gsgrpc"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/helpers"
+	"rloop/Groundstation-v2-Backend-Fork/logging"
+	"rloop/Groundstation-v2-Backend-Fork/server"
 	"strconv"
 )
 
@@ -31,6 +31,7 @@ func main() {
 	var grpcError error
 
 	//networking
+	var listenAddr string
 	var networkConfig gstypes.Networking
 	var hostsTolisten []gstypes.Host
 	var hostsToCommand []gstypes.Host
@@ -53,8 +54,9 @@ func main() {
 	var simCommandChannel chan<- *gstypes.SimulatorCommandWithResponse
 	var simInitChannel chan<- *gstypes.SimulatorInitWithResponse
 	var loggerChannel chan<- gstypes.PacketStoreElement
-	var grpcChannelsHolder *gsgrpc.ChannelsHolder
+	//var grpcChannelsHolder *gsgrpc.ChannelsHolder
 	var dataStoreChannel chan<- gstypes.PacketStoreElement
+	var subscribersHolder *gsgrpc.SubscribersHolder
 	var commandChannel chan<- gstypes.Command
 
 	networkConfig, networkConfigError = helpers.DecodeNetworkingFile("./config/networking.json")
@@ -63,6 +65,8 @@ func main() {
 		log.Fatalf("No config is defined, please define a config file: %v \n", networkConfigError)
 		os.Exit(1)
 	}
+
+	listenAddr = "127.0.0.2"
 	hostsTolisten = networkConfig.HostsToListen
 	hostsToCommand = networkConfig.HostsToCommand
 	GrpcPort = networkConfig.Grpc
@@ -104,15 +108,16 @@ func main() {
 
 	gsLogger, loggerChannel = logging.New()
 	//struct that will contain the channels that will be used to communicate between the datastoremanager and stream server
-	grpcChannelsHolder = gsgrpc.GetChannelsHolder()
+	//grpcChannelsHolder = gsgrpc.GetChannelsHolder()
+	subscribersHolder = gsgrpc.GetSubscribersHolder()
 	//Create the datastoremanager server
-	dataStoreManager, dataStoreChannel = datastore.New(grpcChannelsHolder)
+	dataStoreManager, dataStoreChannel = datastore.New(subscribersHolder)
 	//create the broadcasting server that will send the commands to the rpod
 	udpBroadCasterServer, commandChannel = server.CreateNewUDPCommandServer(hostsToCommand, dataStoreChannel)
 	//Create the UDPListenerServers that will listen to the packets sent by the rpod
-	udpListenerServers = server.CreateNewUDPListenerServers(dataStoreChannel, loggerChannel, nodesPorts, nodesMap)
+	udpListenerServers = server.CreateNewUDPListenerServers(listenAddr, nodesPorts, dataStoreChannel, loggerChannel, nodesMap)
 	//Create the gsgrpc stream server
-	grpcConn, grpcServer, grpcError = gsgrpc.NewGoGrpcServer(GrpcPort, grpcChannelsHolder, commandChannel, simCommandChannel, simInitChannel, serviceChannel, serviceManager)
+	grpcConn, grpcServer, grpcError = gsgrpc.NewGoGrpcServer(GrpcPort, subscribersHolder, commandChannel, simCommandChannel, simInitChannel, serviceChannel, serviceManager)
 
 	serviceManager.SetDatastoreManager(dataStoreManager)
 	serviceManager.SetGsLogger(gsLogger)

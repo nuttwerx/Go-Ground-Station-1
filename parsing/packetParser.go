@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"rloop/Go-Ground-Station-1/constants"
-	"rloop/Go-Ground-Station-1/gstypes"
-	"rloop/Go-Ground-Station-1/helpers"
+	"rloop/Groundstation-v2-Backend-Fork/constants"
+	"rloop/Groundstation-v2-Backend-Fork/gstypes"
+	"rloop/Groundstation-v2-Backend-Fork/helpers"
 	"time"
 )
 
@@ -49,7 +49,7 @@ func ParsePacket(nodePort int, nodeName string, packet []byte, errcount *int) (g
 			}*/
 		return ParsePayload(definition, payloadLengthInt, nodePort, nodeName, payload)
 	} else {
-		errmsg := fmt.Sprintf("packet type '%d' is not defined", packetType)
+		errmsg := fmt.Sprintf("packet type '%d' is not defined \n", packetType)
 		return gstypes.PacketStoreElement{}, errors.New(errmsg)
 	}
 
