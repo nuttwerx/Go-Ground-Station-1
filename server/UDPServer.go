@@ -189,37 +189,45 @@ BroadCastLoop:
 		if err != nil {
 			fmt.Println(err)
 		} else {
+			//check if connection is set
+			if conn == nil {
+				//connection is not set, print message and skip the iteration
+				fmt.Println("Broadcaster Connection is not open")
+				continue
+			}
 			//if no conflicts on address, serialize the command
 			packetBytes, err = srv.serialize(cmd)
-		}
-		//if there's no error with serialization, send the command
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			//fmt.Printf("\n sending command to node: %s on address %s \n", cmd.Node, destination.String())
-			//fmt.Printf("Data: %v \n", cmd.Data)
-			//fmt.Printf("command bytes: %v \n", packetBytes)
-			_, connErr = conn.Write(packetBytes)
-			fmt.Printf("Sending command: %d \n", cmd.CommandId)
-		}
+			//if there's no error with serialization, send the command
+			if err != nil {
+				//there's an error, abort
+				fmt.Println(err)
+				continue
+			} else {
+				//fmt.Printf("\n sending command to node: %s on address %s \n", cmd.Node, destination.String())
+				//fmt.Printf("Data: %v \n", cmd.Data)
+				//fmt.Printf("command bytes: %v \n", packetBytes)
+				_, connErr = conn.Write(packetBytes)
+				fmt.Printf("Sending command: %d \n", cmd.PacketType)
+			}
 
-		if connErr != nil || conn == nil {
-			fmt.Printf("Command write error: %v", connErr)
-		} else {
-			srv.podCommandSequence++
-			paramName := "Last Command " + cmd.Origin
-			unit := gstypes.DataStoreUnit{
-				ValueIndex: 3,
-				Int32Value: cmd.CommandId}
-			element := gstypes.DataStoreElement{
-				ParameterName: paramName,
-				Data:          unit,
-				RxTime:        time.Now().Unix()}
-			dataStoreElementArr := []gstypes.DataStoreElement{element}
-			statusDataStore = gstypes.PacketStoreElement{
-				Parameters: dataStoreElementArr}
-			srv.dataStoreChannel <- statusDataStore
-			conn.Close()
+			if connErr != nil {
+				fmt.Printf("Command write error: %v", connErr)
+			} else {
+				srv.podCommandSequence++
+				paramName := "Last Command " + cmd.Origin
+				unit := gstypes.DataStoreUnit{
+					ValueIndex: 3,
+					Int32Value: cmd.CommandId}
+				element := gstypes.DataStoreElement{
+					ParameterName: paramName,
+					Data:          unit,
+					RxTime:        time.Now().Unix()}
+				dataStoreElementArr := []gstypes.DataStoreElement{element}
+				statusDataStore = gstypes.PacketStoreElement{
+					Parameters: dataStoreElementArr}
+				srv.dataStoreChannel <- statusDataStore
+				conn.Close()
+			}
 		}
 	}
 	srv.isRunning = false
